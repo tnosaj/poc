@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
@@ -14,11 +15,15 @@ func evaluateInputs() (internals.Settings, error) {
 
 	flag.BoolVar(&s.Debug, "v", false, "Enable verbose debugging output")
 
-	flag.StringVar(&s.AsyncTransport, "async", "nullqueue", "Use this queue")
+	flag.StringVar(&s.AsyncTransportSettings.Name, "async", "nullqueue", "Use this queue")
 	flag.StringVar(&s.Port, "p", "8080", "Starts server on this port")
-	flag.StringVar(&s.SyncTransport, "sync", "nullhttp", "Use this http transport")
+	flag.StringVar(&s.SyncTransportSettings.Name, "sync", "nullhttp", "Use this http transport")
 
-	flag.IntVar(&s.Timeout, "t", 1, "Timeout in seconds for a backend answer")
+	var tmpString string
+	flag.StringVar(&tmpString, "baseurls", `{"client":{"sync":"syncClientHost"},"session":{"sync":"syncSessionHost","async":"asyncSessionHost"}}`, "Json format of urls")
+	json.Unmarshal([]byte(tmpString), &s.Backends)
+
+	flag.IntVar(&s.SyncTransportSettings.Timeout, "t", 1, "Timeout in seconds for a backend answer")
 
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage of %s: [flags] command [command args…]\n", os.Args[0])
@@ -33,8 +38,8 @@ func evaluateInputs() (internals.Settings, error) {
 		"kafka":     true,
 		"nullqueue": true,
 	}
-	if !acceptedQueuess[s.AsyncTransport] {
-		return internals.Settings{}, fmt.Errorf("Unknown queue engine specified: %q", s.AsyncTransport)
+	if !acceptedQueuess[s.AsyncTransportSettings.Name] {
+		return internals.Settings{}, fmt.Errorf("Unknown queue engine specified: %q", s.AsyncTransportSettings)
 	}
 
 	return s, nil

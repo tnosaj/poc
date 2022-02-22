@@ -12,9 +12,9 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
-	"github.com/tnosaj/poc/public-api/internals"
 	"github.com/tnosaj/poc/public-api/metrics"
 	"github.com/tnosaj/poc/public-api/routes"
+	"github.com/tnosaj/poc/public-api/runtime"
 )
 
 func main() {
@@ -24,16 +24,16 @@ func main() {
 		log.Fatalf("could not evaluate inputs: %q", err)
 	}
 
-	runtime := internals.NewRuntime(
-		s.AsyncTransport,
-		s.SyncTransport,
+	runtime := runtime.NewRuntime(
+		s.AsyncTransportSettings,
+		s.SyncTransportSettings,
 		metrics.RegisterPrometheusMetrics(),
 	)
 
-	apiRouter := routes.InitializeNewRoutes(runtime)
-
+	// init should also include mux.NewRouter and seperate into N sync and async as well as only init each route as you have configs
 	router := mux.NewRouter()
-	apiRouter.RegisterRoutes(router)
+	routes.InitializeNewRoutes(runtime, s.Backends, router)
+
 	router.Handle("/metrics", promhttp.Handler())
 
 	srv := &http.Server{

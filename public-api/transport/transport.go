@@ -1,11 +1,11 @@
 package transport
 
 type AsyncTransport interface {
-	Send() error
+	Send(string, []byte) error
 	Listen() error
 }
 
 type SyncTransport interface {
-	Get() error
-	Post() error
+	Get(string) ([]byte, error)
+	Post(string, []byte) ([]byte, error)
 }

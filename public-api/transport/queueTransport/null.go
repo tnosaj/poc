@@ -1,4 +1,4 @@
-package queues
+package queueTransport
 
 import (
 	"github.com/sirupsen/logrus"
@@ -12,7 +12,7 @@ func NewNullAsyncTransport() transport.AsyncTransport {
 	return &NullAsyncTransport{}
 }
 
-func (t *NullAsyncTransport) Send() error {
+func (t *NullAsyncTransport) Send(topic string, payload []byte) error {
 	logrus.Infof("Null transport Send")
 	return nil
 }
