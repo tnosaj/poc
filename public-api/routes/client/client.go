@@ -33,11 +33,11 @@ func (c *ClientApi) RegisterClientRoutes(sub *mux.Router, backends map[string]st
 	for backend := range backends {
 		switch backend {
 		case "async":
-			c.AsyncTransportUrl = backend
+			c.AsyncTransportUrl = backends[backend]
 			c.registerAsyncClientRoutes(sub)
 
 		case "sync":
-			c.SyncTransportUrl = backend
+			c.SyncTransportUrl = backends[backend]
 			c.registerSyncClientRoutes(sub)
 
 		}
